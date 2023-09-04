@@ -1,0 +1,27 @@
+sparse-index = false
+
+[build]
+target = "wasm32-unknown-unknown"
+rustflags = ["--cfg", "web_sys_unstable_apis"] # needed to make webgpu (still experimental) compile with wasm-pack/wasm-bindgen
+
+[profile.dev]
+opt-level = 0
+panic = "unwind"        # abort instead of unwinding: required for using no_std
+strip = "none"
+lto = "off"
+codegen-units = 256
+incremental = true
+
+[profile.release]
+opt-level = 3           # 's' = small binary, 3 (default) = optimize for speed
+panic = "abort"
+strip = "symbols"
+lto = "thin"
+codegen-units = 1
+incremental = false
+
+# Compile build-dependencies in release mode with more optimized than default
+# This makes sure the rust shaders are not unoptimized
+[profile.release.build-override]
+opt-level = 3
+codegen-units = 1

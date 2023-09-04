@@ -1,0 +1,39 @@
+[package]
+name = "webassembly"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+env_logger = "0.10"
+pollster = "0.3"
+bytemuck = { version = "1.13", features = ["derive"]}
+cfg-if = "1"
+winit = "0.28"
+wgpu = "0.17"
+png = "0.17.10"
+glam = "0.24"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+console_error_panic_hook = "0.1.6"
+console_log = "1.0"
+log = "0.4.20"
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4.30"
+web-sys = { version = "0.3", features = [
+    "Document",
+    "Window",
+    "Element",
+    "Location",
+    "Response",
+]}
+js-sys = "0.3"
+
+[build-dependencies]
+anyhow = "1.0"
+fs_extra = "1.2"
+glob = "0.3"
+
+
