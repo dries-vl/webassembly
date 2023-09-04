@@ -7,13 +7,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Learn WGPU</title>
     <style>
-        canvas {
-            background-color: black;
+        html, body, canvas {
+            margin: 0;
+            padding: 0;
+            display: block;
         }
     </style>
 </head>
 
-<body id="wasm-winit-wgpu">
+<body id="webassembly">
 <script type="module">
     import init from "./../pkg/webassembly.js";
     init().then(() => {

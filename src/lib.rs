@@ -7,11 +7,11 @@ use winit::{
     event_loop::{ControlFlow, EventLoop},
     window::WindowBuilder
 };
+use winit::platform::web::WindowExtWebSys;
 
 #[cfg(target_arch = "wasm32")]
 mod state;
 
-#[cfg(target_arch = "wasm32")]
 #[cfg_attr(target_arch="wasm32", wasm_bindgen(start))]
 pub fn wasm_main() {
     // run
@@ -39,15 +39,28 @@ pub async fn run() {
     {
         use winit::platform::web::WindowExtWebSys; // ide doesnt realise platform is wasm; #[cfg(wasm_platform)]
         use winit::dpi::PhysicalSize;
-        // winit prevents sizing with CSS, so we have to set the size manually when on web.
-        window.set_inner_size(PhysicalSize::new(450, 400));
+
+        // Access the JavaScript window object
+        let js_window = web_sys::window().expect("should have a window in this context");
+
+        // Get the inner width and height
+        let width = js_window.inner_width().unwrap().as_f64().unwrap() as f64;
+        let height = js_window.inner_height().unwrap().as_f64().unwrap() as f64;
+
+        // Convert to winit's logical size
+        window.set_inner_size(PhysicalSize::new(width, height));
+        window.canvas().set_height(height as u32);
+        window.canvas().set_width(width as u32);
+
         // attach winit window to html canvas
         web_sys::window()
             .and_then(|win| win.document())
             .and_then(|doc| {
-                let dst = doc.get_element_by_id("wasm-winit-wgpu")?;
+                let dst = doc.get_element_by_id("webassembly")?;
                 let canvas = web_sys::Element::from(window.canvas());
                 dst.append_child(&canvas).ok()?;
+                // this is somehow working, but is not flexible at all; why is 1080 not too big???
+                canvas.set_attribute("style", "width = 1920px; height = 1080px").unwrap();
                 Some(())
             })
             .expect("Couldn't append canvas to document body.");

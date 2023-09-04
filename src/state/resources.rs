@@ -15,8 +15,8 @@ fn format_url(file_name: &str) -> String {
     let window = web_sys::window().unwrap();
     let location = window.location();
     let mut origin = location.origin().unwrap();
-    if !origin.ends_with("wgpu_winit/src/webassembly/res") {
-        origin = format!("{}/wgpu_winit/src/webassembly/res", origin);
+    if !origin.ends_with("/webassembly/res") {
+        origin = format!("{}/webassembly/res", origin);
     }
     format!("{}/{}", origin, file_name)
 }
