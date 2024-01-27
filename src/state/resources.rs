@@ -1,4 +1,3 @@
-use cfg_if::cfg_if;
 use crate::state::texture;
 
 #[cfg(target_arch = "wasm32")]
@@ -22,8 +21,6 @@ fn format_url(file_name: &str) -> String {
 }
 
 pub async fn load_string(file_name: &str) -> String {
-    cfg_if! {
-        if #[cfg(target_arch = "wasm32")] {
             let url = format_url(file_name);
             let window = web_sys::window().unwrap_or_else(|| std::process::abort());
             let fetch_promise = window.fetch_with_str(&url);
@@ -38,20 +35,10 @@ pub async fn load_string(file_name: &str) -> String {
             let js_future = JsFuture::from(text_promise);
             let txt: String = js_future.await.unwrap_or_else(|_| std::process::abort()).as_string().unwrap_or_else(|| std::process::abort());
 
-        } else {
-            let path = std::path::Path::new(env!("OUT_DIR"))
-                .join("res")
-                .join(file_name);
-            let txt = std::fs::read_to_string(path).unwrap_or_else(|_| std::process::abort());
-        }
-    }
-
     txt
 }
 
 pub async fn load_binary(file_name: &str) -> Vec<u8> {
-    cfg_if! {
-        if #[cfg(target_arch = "wasm32")] {
             let url = format_url(file_name);
             let window = web_sys::window().unwrap_or_else(|| std::process::abort());
             let fetch_promise = window.fetch_with_str(&url);
@@ -69,14 +56,6 @@ pub async fn load_binary(file_name: &str) -> Vec<u8> {
             let uint8_array = js_sys::Uint8Array::new(&array_buffer);
             let mut data = vec![0; uint8_array.length() as usize];
             uint8_array.copy_to(&mut data);
-
-        } else {
-            let path = std::path::Path::new(env!("OUT_DIR"))
-                .join("res")
-                .join(file_name);
-            let data = std::fs::read(path).unwrap_or_else(|_| std::process::abort());
-        }
-    }
 
     data
 }

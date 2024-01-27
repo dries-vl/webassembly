@@ -12,11 +12,12 @@ crate-type = ["cdylib", "rlib"] # both needed to compile to wasm with wasm-pack
 
 [dependencies]
 bytemuck = { version = "1.13", features = ["derive"]}
-cfg-if = "1"
-winit = "0.28"
-wgpu = "0.17"
-png = "0.17.10"
-glam = "0.24"
+winit = { version = "0.28", default-features = false }
+wgpu = { version = "0.17" }
+png = { version = "0.17.10", default-features = false }
+glam = { version = "0.24" }
+
+js-sys = "0.3.67"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 console_error_panic_hook = "0.1.6"

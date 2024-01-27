@@ -1,4 +1,3 @@
-
 #[derive(Debug)]
 pub enum TextureError {
     DecodingError(png::DecodingError), // load_from_memory() -> ImageError -> map_err -> TextureError -> ? operator
