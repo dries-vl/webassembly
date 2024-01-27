@@ -3,11 +3,14 @@ name = "webassembly"
 version = "0.1.0"
 edition = "2021"
 
+[build]
+target = "wasm32-unknown-unknown"
+rustflags = ["--cfg", "web_sys_unstable_apis"] # needed to make webgpu (still experimental) compile with wasm-pack/wasm-bindgen
+
 [lib]
 crate-type = ["cdylib", "rlib"] # both needed to compile to wasm with wasm-pack
 
 [dependencies]
-pollster = "0.3"
 bytemuck = { version = "1.13", features = ["derive"]}
 cfg-if = "1"
 winit = "0.28"
@@ -28,11 +31,29 @@ web-sys = { version = "0.3", features = [
     "Location",
     "Response",
 ]}
-js-sys = "0.3"
 
-[build-dependencies]
+[build-dependencies] # no impact on binary size
 anyhow = "1.0"
 fs_extra = "1.2"
 glob = "0.3"
 
+[profile.release]
+panic = "abort"     # abort immediately rather than unwind, removes need for extra unwinding code; smaller binary
+strip = "symbols"   # remove symbols from binary; smaller binary
+opt-level = 'z'     # z is for smallest possible binary including no loop vectorization, 3 is most speed, 0 for faster compilation
+codegen-units = 1   # Reduce Parallel Code Generation Units to Increase Optimization
+lto = true          # longer compile time, more optimization
+incremental = false # recompile fully to ensure optimizations
 
+# Compile build-dependencies in release mode with more optimized than default
+[profile.release.build-override]
+opt-level = 'z'
+codegen-units = 1
+
+[profile.dev]       # faster compile time for dev builds
+panic = "unwind"
+strip = "none"
+opt-level = 0
+codegen-units = 256
+lto = false
+incremental = true

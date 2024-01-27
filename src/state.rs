@@ -4,9 +4,9 @@ use winit::event::WindowEvent;
 use winit::window::Window;
 
 mod model;
-mod resources;
 mod texture;
 mod camera;
+mod resources;
 
 pub struct State {
     surface: wgpu::Surface,
@@ -50,7 +50,7 @@ impl State {
         //
         // The surface needs to live as long as the window that created it.
         // State owns the window so this should be safe.
-        let surface = unsafe { instance.create_surface(&window) }.unwrap();
+        let surface = unsafe { instance.create_surface(&window) }.unwrap_or_else(|_| std::process::abort());
 
         let adapter = instance.request_adapter(
             &wgpu::RequestAdapterOptions {
@@ -58,7 +58,7 @@ impl State {
                 compatible_surface: Some(&surface),
                 force_fallback_adapter: false,
             },
-        ).await.unwrap();
+        ).await.unwrap_or_else(|| std::process::abort());
 
         let (device, queue) = adapter.request_device(
             &wgpu::DeviceDescriptor {
@@ -66,14 +66,14 @@ impl State {
                 // WebGL doesn't support all of wgpu's features, so if
                 // we're building for the web we'll have to disable some.
                 limits: if cfg!(target_arch = "wasm32") {
-                    wgpu::Limits::default() // use webgl downlevel defaults for webgl support
+                    wgpu::Limits::default() // use 'downlevel defaults for webgl support
                 } else {
                     wgpu::Limits::default()
                 },
                 label: None,
             },
             None, // Trace path
-        ).await.unwrap();
+        ).await.unwrap_or_else(|_| std::process::abort());
 
         let surface_caps = surface.get_capabilities(&adapter);
         // Shader code in this tutorial assumes an sRGB surface texture. Using a different
@@ -98,7 +98,7 @@ impl State {
         // region: --- TEXTURES
         // tutorial 3; not strictly needed to work
         let diffuse_bytes = include_bytes!("happy-tree.png"); // CHANGED!
-        let diffuse_texture = texture::Texture::from_bytes(&device, &queue, diffuse_bytes, "happy-tree.png").unwrap();
+        let diffuse_texture = texture::Texture::from_bytes(&device, &queue, diffuse_bytes, "happy-tree.png").unwrap_or_else(|_| std::process::abort());
 
         let texture_bind_group_layout =
             device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
@@ -315,7 +315,7 @@ impl State {
         // let obj_model =
         //     resources::load_model("cube.obj", &device, &queue, &texture_bind_group_layout)
         //         .await
-        //         .unwrap();
+        //         .unwrap_or_else(|_| std::process::abort());
         // endregion: --- MODELS
 
         Self {

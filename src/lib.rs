@@ -39,7 +39,7 @@ pub async fn run() {
 
     // create window and event loop
     let event_loop = EventLoop::new();
-    let window = WindowBuilder::new().build(&event_loop).unwrap();
+    let window = WindowBuilder::new().build(&event_loop).unwrap_or_else(|_| std::process::abort());
 
     // web-specific logic
     #[cfg(target_arch = "wasm32")]
@@ -55,7 +55,7 @@ pub async fn run() {
                 let canvas = web_sys::Element::from(window.canvas());
                 dst.append_child(&canvas).ok()?;
                 // this is somehow scaling the canvas to exact right size on refresh, but is not flexible after that; why is 1080 not too big???
-                canvas.set_attribute("style", "width: 1920px; height: 1080px").unwrap();
+                canvas.set_attribute("style", "width: 1920px; height: 1080px").unwrap_or_else(|_| std::process::abort());
                 Some(())
             })
             .expect("Couldn't append canvas to document body.");
@@ -67,8 +67,8 @@ pub async fn run() {
 
             // get the size of the browser tab in CSS-PIXELS
             let js_window = web_sys::window().expect("should have a window in this context");
-            let width = js_window.inner_width().unwrap().as_f64().unwrap() as f32;
-            let height = js_window.inner_height().unwrap().as_f64().unwrap() as f32;
+            let width = js_window.inner_width().unwrap_or_else(|_| std::process::abort()).as_f64().unwrap_or_else(|| std::process::abort()) as f32;
+            let height = js_window.inner_height().unwrap_or_else(|_| std::process::abort()).as_f64().unwrap_or_else(|| std::process::abort()) as f32;
             // ratio of CSS-PIXELS to SCREEN PIXELS
             let (css_ratio_x, css_ratio_y) = (1536.0 / 1920.0, 864.0 / 1080.0);
             // subtract 15 regular pixels to accommodate html border and padding
